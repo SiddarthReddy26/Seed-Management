@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paddy Seed Management System</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <span>Paddy Seed Management</span>
+            </div>
+            <div class="search-container">
+                <input type="text" id="globalSearch" placeholder="Search anything..." class="global-search">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav" id="navigation">
+        <ul class="nav-list">
+            <li><a href="#" data-section="dashboard" class="nav-link active"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+            <li><a href="#" data-section="farmers" class="nav-link"><i class="fas fa-users"></i>Farmer Management</a></li>
+            <li><a href="#" data-section="inventory" class="nav-link"><i class="fas fa-warehouse"></i>Seed Inventory</a></li>
+            <li><a href="#" data-section="distribution" class="nav-link"><i class="fas fa-truck"></i>Seed Distribution</a></li>
+            <li><a href="#" data-section="logistics" class="nav-link"><i class="fas fa-tractor"></i>Logistics Management</a></li>
+            <li><a href="#" data-section="payments" class="nav-link"><i class="fas fa-credit-card"></i>Payments</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <div class="section-header">
+                <h1><i class="fas fa-tachometer-alt"></i>Dashboard</h1>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-users"></i></div>
+                    <div class="metric-info">
+                        <div class="metric-value" id="totalFarmers">0</div>
+                        <div class="metric-label">Total Farmers</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-handshake"></i></div>
+                    <div class="metric-info">
+                        <div class="metric-value" id="activeContracts">0</div>
+                        <div class="metric-label">Active Contracts</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                    <div class="metric-info">
+                        <div class="metric-value" id="pendingSettlements">0</div>
+                        <div class="metric-label">Pending Settlements</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-warehouse"></i></div>
+                    <div class="metric-info">
+                        <span class="metric-label">Total Inventory Bags</span>
+                        <span class="metric-value" id="totalInventoryBags"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="action-buttons">
+                    <button class="btn btn--primary action-btn" data-action="add-farmer">
+                        <i class="fas fa-user-plus"></i>Add Farmer
+                    </button>
+                    <button class="btn btn--primary action-btn" data-action="add-inventory">
+                        <i class="fas fa-plus"></i>Add Inventory
+                    </button>
+                    <button class="btn btn--primary action-btn" data-action="create-distribution">
+                        <i class="fas fa-truck"></i>Create Distribution
+                    </button>
+                    <button class="btn btn--primary action-btn" data-action="record-payment">
+                        <i class="fas fa-money-bill"></i>Record Payment
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
+            <div class="recent-activity" id="recentActivity">
+                <h2>Recent Activity</h2>
+                <ul class="activity-list" id="activityList">
+                    <!-- Recent activities will be populated here -->
+                </ul>
+            </div>
+        </section>
+
+        <!-- Farmer Management Section -->
+        <section id="farmers" class="section">
+            <div class="section-header">
+                <h1><i class="fas fa-users"></i>Farmer Management</h1>
+                <button class="btn btn--primary" id="addFarmerBtn">
+                    <i class="fas fa-plus"></i>Add New Farmer
+                </button>
+            </div>
+            
+            <div class="search-filter-bar">
+                <input type="text" id="farmerSearch" placeholder="Search farmers by name, contact, or location..." class="form-control search-input">
+            </div>
+
+            <div class="data-grid" id="farmersGrid">
+                <!-- Farmers will be populated here -->
+            </div>
+        </section>
+
+        <!-- Seed Inventory Section -->
+        <section id="inventory" class="section">
+            <div class="section-header">
+                <h1><i class="fas fa-warehouse"></i>Seed Inventory</h1>
+                <button class="btn btn--primary" id="addInventoryBtn">
+                    <i class="fas fa-plus"></i>Add New Item
+                </button>
+            </div>
+            
+            <div class="search-filter-bar">
+                <input type="text" id="inventorySearch" placeholder="Search by seed type, supplier, or availability..." class="form-control search-input">
+            </div>
+
+            <div class="data-grid" id="inventoryGrid">
+                <!-- Inventory will be populated here -->
+            </div>
+        </section>
+
+        <!-- Seed Distribution Section -->
+        <section id="distribution" class="section">
+            <div class="section-header">
+                <h1><i class="fas fa-truck"></i>Seed Distribution</h1>
+                <button class="btn btn--primary" id="addDistributionBtn">
+                    <i class="fas fa-plus"></i>Create Distribution
+                </button>
+            </div>
+            
+            <div class="search-filter-bar">
+                <input type="text" id="distributionSearch" placeholder="Search by farmer, date, or seed type..." class="form-control search-input">
+            </div>
+
+            <div class="data-grid" id="distributionGrid">
+                <!-- Distributions will be populated here -->
+            </div>
+        </section>
+
+        <!-- Logistics Management Section -->
+        <section id="logistics" class="section">
+            <div class="section-header">
+                <h1><i class="fas fa-tractor"></i>Logistics Management</h1>
+                <button class="btn btn--primary" id="addLogisticsBtn">
+                    <i class="fas fa-plus"></i>Add Logistics Entry
+                </button>
+            </div>
+            
+            <div class="search-filter-bar">
+                <input type="text" id="logisticsSearch" placeholder="Search by tractor number, driver name, or destination..." class="form-control search-input">
+                <select id="statusFilter" class="form-control filter-select">
+                    <option value="">All Status</option>
+                    <option value="Loading">Loading</option>
+                    <option value="In Transit">In Transit</option>
+                    <option value="Delivered">Delivered</option>
+                </select>
+            </div>
+
+            <div class="data-grid" id="logisticsGrid">
+                <!-- Logistics will be populated here -->
+            </div>
+        </section>
+
+        <!-- Payments Section -->
+        <section id="payments" class="section">
+            <div class="section-header">
+                <h1><i class="fas fa-credit-card"></i>Payments</h1>
+                <button class="btn btn--primary" id="addPaymentBtn">
+                    <i class="fas fa-plus"></i>Record Payment
+                </button>
+            </div>
+            
+            <div class="search-filter-bar">
+                <input type="text" id="paymentSearch" placeholder="Search by farmer name, account number, or payment method..." class="form-control search-input">
+                <select id="paymentMethodFilter" class="form-control filter-select">
+                    <option value="">All Methods</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Check">Check</option>
+                </select>
+            </div>
+
+            <div class="data-grid" id="paymentsGrid">
+                <!-- Payments will be populated here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Forms -->
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Form</h2>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Form content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading hidden">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Processing...</div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <div class="toast-content">
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
