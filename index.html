@@ -12,15 +12,16 @@
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <i class="fas fa-seedling"></i>
-                <span>Paddy Seed Management</span>
             </div>
             <div class="search-container">
-                <input type="text" id="globalSearch" placeholder="Search anything..." class="global-search">
-                <i class="fas fa-search search-icon"></i>
+            </div>
+            <div id="userArea" class="user-area">
+                <span id="currentUserDisplay" class="current-user"></span>
+                <button id="logoutBtn" class="btn btn--link hidden" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
             <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
             </button>
         </div>
     </header>
@@ -210,13 +211,10 @@
     <div id="modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">Form</h2>
-                <button class="modal-close" id="modalClose">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h3 id="modalTitle"></h3>
+                <button id="modalClose" class="btn-icon" title="Close"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Form content will be populated here -->
+            <div id="modalBody" class="modal-body">
             </div>
         </div>
     </div>

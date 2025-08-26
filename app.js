@@ -2,6 +2,8 @@
 class AgricultureApp {
     constructor() {
         this.currentSection = 'dashboard';
+        this.currentUser = null;        // NEW
+        this.users = [];                // NEW
         this.data = {
             farmers: [],
             inventory: [],
@@ -14,15 +16,55 @@ class AgricultureApp {
     }
 
     init() {
+        this.loadUsers(); // NEW
+        const storedCurrent = localStorage.getItem('agricultureAppCurrentUser');
+        if (storedCurrent) {
+            try {
+                this.currentUser = JSON.parse(storedCurrent);
+            } catch (e) {
+                this.currentUser = null;
+            }
+        }
+
+        if (!this.currentUser) {
+            // show signup/login modal and halt rendering until user logs in
+            this.showAuthModal();
+            this.bindEvents(); // still bind events (for auth UI)
+            return;
+        }
+
         this.loadData();
         this.bindEvents();
         this.renderDashboard();
         this.renderAllSections();
     }
 
-    // Data Management
+    // --- Users (auth) ---
+    loadUsers() {
+        const raw = localStorage.getItem('agricultureAppUsers');
+        if (raw) {
+            try {
+                this.users = JSON.parse(raw);
+            } catch (e) {
+                this.users = [];
+            }
+        } else {
+            this.users = [];
+        }
+    }
+
+    saveUsers() {
+        localStorage.setItem('agricultureAppUsers', JSON.stringify(this.users));
+    }
+
+    getDataKey() {
+        if (!this.currentUser || !this.currentUser.username) return 'agricultureAppData';
+        return `agricultureAppData_${this.currentUser.username}`;
+    }
+
     loadData() {
-        const storedData = localStorage.getItem('agricultureAppData');
+        const key = this.getDataKey();
+        const storedData = localStorage.getItem(key);
         if (storedData) {
             try {
                 const parsed = JSON.parse(storedData);
@@ -42,7 +84,6 @@ class AgricultureApp {
                 };
             }
         } else {
-            // No stored data — start with empty datasets (no sample data)
             this.data = {
                 farmers: [],
                 inventory: [],
@@ -50,12 +91,154 @@ class AgricultureApp {
                 logistics: [],
                 payments: []
             };
-            this.saveData(); // optional: persist empty structure
+            // do NOT auto-save here; save when user adds data
         }
     }
 
     saveData() {
-        localStorage.setItem('agricultureAppData', JSON.stringify(this.data));
+        const key = this.getDataKey();
+        localStorage.setItem(key, JSON.stringify(this.data));
+    }
+
+    // --- Authentication UI ---
+    showAuthModal() {
+        const isExisting = this.users.length > 0;
+        const content = `
+            <div class="auth-switch">
+                <button id="showLoginBtn" class="btn ${isExisting ? '' : 'hidden'}">Login</button>
+                <button id="showSignupBtn" class="btn">Sign Up</button>
+            </div>
+            <div id="authContainer"></div>
+        `;
+        this.showModal(isExisting ? 'Login or Sign Up' : 'Create First Account', content);
+
+        // attach handlers after modal renders
+        setTimeout(() => {
+            const showLoginBtn = document.getElementById('showLoginBtn');
+            const showSignupBtn = document.getElementById('showSignupBtn');
+            if (showLoginBtn) showLoginBtn.addEventListener('click', () => this.showLoginForm());
+            if (showSignupBtn) showSignupBtn.addEventListener('click', () => this.showSignupForm());
+            // default view
+            if (isExisting) this.showLoginForm(); else this.showSignupForm();
+        }, 50);
+    }
+
+    showLoginForm() {
+        const container = document.getElementById('authContainer');
+        if (!container) return;
+        container.innerHTML = `
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input name="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn--primary" type="submit">Login</button>
+                </div>
+            </form>
+        `;
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            this.login(fd.get('username'), fd.get('password'));
+        });
+    }
+
+    showSignupForm() {
+        const container = document.getElementById('authContainer');
+        if (!container) return;
+        container.innerHTML = `
+            <form id="signupForm">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input name="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn--primary" type="submit">Create Account</button>
+                </div>
+            </form>
+        `;
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            this.signup(fd.get('username'), fd.get('password'));
+        });
+    }
+
+    hashPassword(pwd) {
+        try {
+            return btoa(pwd); // simple encoding for local app (not secure)
+        } catch (e) {
+            return pwd;
+        }
+    }
+
+    signup(username, password) {
+        username = username.trim();
+        if (!username || !password) return this.showToast('Username and password required', 'error');
+        if (this.users.find(u => u.username === username)) return this.showToast('Username already exists', 'error');
+
+        const newId = Math.max(...this.users.map(u => u.id || 0), 0) + 1;
+        const user = { id: newId, username, password: this.hashPassword(password) };
+        this.users.push(user);
+        this.saveUsers();
+
+        // set as current user and create empty data space
+        this.currentUser = { id: user.id, username: user.username };
+        localStorage.setItem('agricultureAppCurrentUser', JSON.stringify(this.currentUser));
+        this.loadData(); // loads empty for new user
+        this.hideModal();
+        this.bindEvents(); // ensure events bound
+        this.renderDashboard();
+        this.renderAllSections();
+        this.updateUserArea();
+        this.showToast('Account created. Logged in.', 'success');
+    }
+
+    login(username, password) {
+        const user = this.users.find(u => u.username === username);
+        if (!user) return this.showToast('User not found', 'error');
+        if (user.password !== this.hashPassword(password)) return this.showToast('Invalid credentials', 'error');
+
+        this.currentUser = { id: user.id, username: user.username };
+        localStorage.setItem('agricultureAppCurrentUser', JSON.stringify(this.currentUser));
+        this.loadData();
+        this.hideModal();
+        this.bindEvents();
+        this.renderDashboard();
+        this.renderAllSections();
+        this.updateUserArea();
+        this.showToast('Logged in successfully', 'success');
+    }
+
+    logout() {
+        localStorage.removeItem('agricultureAppCurrentUser');
+        this.currentUser = null;
+        // clear current UI data and prompt auth
+        this.data = { farmers: [], inventory: [], distributions: [], logistics: [], payments: [] };
+        this.updateUserArea();
+        this.showAuthModal();
+    }
+
+    updateUserArea() {
+        const display = document.getElementById('currentUserDisplay');
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (!display || !logoutBtn) return;
+        if (this.currentUser) {
+            display.textContent = this.currentUser.username;
+            logoutBtn.classList.remove('hidden');
+        } else {
+            display.textContent = '';
+            logoutBtn.classList.add('hidden');
+        }
     }
 
     // Event Binding
@@ -187,6 +370,12 @@ class AgricultureApp {
             modal.addEventListener('click', (e) => {
                 if (e.target.id === 'modal') this.hideModal();
             });
+        }
+
+        // Logout button (auth)
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => this.logout());
         }
     }
 
