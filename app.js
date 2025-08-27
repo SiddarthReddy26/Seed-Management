@@ -1365,23 +1365,19 @@ class AgricultureApp {
 
     // Generate a single Excel/CSV sheet for seed distribution:
     // Columns: Farmer Name | [Seed Type 1] | [Seed Type 2] | ... | [Seed Type N]
-    // Each row: Farmer, and number of bags taken for each seed type
+    // Each row: Farmer, and number of bags for each seed type
 
     generateSeedDistributionSummaryExcel() {
         // Get all unique seed types
         const seedTypes = [...new Set(this.data.distributions.map(d => d.seedType))];
-
-        // Get all unique farmers
         const farmers = [...new Set(this.data.distributions.map(d => d.farmer))];
 
-        // Build header
         let csv = 'Farmer Name';
         seedTypes.forEach(type => {
             csv += `,${type}`;
         });
         csv += '\n';
 
-        // Build rows: for each farmer, count bags for each seed type
         farmers.forEach(farmer => {
             csv += `"${farmer}"`;
             seedTypes.forEach(type => {
@@ -1393,16 +1389,30 @@ class AgricultureApp {
             csv += '\n';
         });
 
-        // Download as CSV
+        // Create a blob and a visible download link
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'SeedDistributionSummary.csv';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+
+        // Remove any previous download link
+        const oldLink = document.getElementById('seedDistDownloadLink');
+        if (oldLink) oldLink.remove();
+
+        // Create a visible download link
+        const link = document.createElement('a');
+        link.id = 'seedDistDownloadLink';
+        link.href = url;
+        link.download = 'SeedDistributionSummary.csv';
+        link.textContent = 'Tap here to download Seed Distribution Summary Excel';
+        link.className = 'btn btn--primary';
+        link.style.display = 'block';
+        link.style.margin = '1em 0';
+
+        // Insert below the button
+        const dashboardSection = document.getElementById('dashboard');
+        dashboardSection.appendChild(link);
+
+        // Optionally, revoke URL after some time
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
     }
 
     // Utility for downloading CSV files
