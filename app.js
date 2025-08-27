@@ -1308,6 +1308,115 @@ class AgricultureApp {
         `;
         this.showModal('Seed Types & Bags Breakdown', content);
     }
+
+    // Generate Excel/CSV for all sections, especially grouped seed bags taken by farmers
+    generateAllExcelSheets() {
+        // 1. Seed Distribution grouped by seed type
+        const distGroups = {};
+        this.data.distributions.forEach(dist => {
+            if (!distGroups[dist.seedType]) distGroups[dist.seedType] = [];
+            distGroups[dist.seedType].push(dist);
+        });
+
+        Object.entries(distGroups).forEach(([seedType, dists]) => {
+            let csv = 'Farmer,Seed Type,Quantity,Date,Status\n';
+            dists.forEach(dist => {
+                csv += `"${dist.farmer}","${dist.seedType}",${dist.quantity},"${dist.date}","${dist.status}"\n`;
+            });
+            this.downloadCSV(csv, `SeedDistribution_${seedType}.csv`);
+        });
+
+        // 2. Farmers
+        if (this.data.farmers.length) {
+            let csv = 'Name,Contact,Address,Farm Size,Crops\n';
+            this.data.farmers.forEach(f => {
+                csv += `"${f.name}","${f.contact}","${f.address}","${f.farmSize}","${f.crops}"\n`;
+            });
+            this.downloadCSV(csv, 'Farmers.csv');
+        }
+
+        // 3. Inventory
+        if (this.data.inventory.length) {
+            let csv = 'Type,Quantity,Unit,Price,Supplier,Expiry\n';
+            this.data.inventory.forEach(i => {
+                csv += `"${i.type}",${i.quantity},"${i.unit}",${i.price},"${i.supplier}","${i.expiry}"\n`;
+            });
+            this.downloadCSV(csv, 'Inventory.csv');
+        }
+
+        // 4. Logistics
+        if (this.data.logistics.length) {
+            let csv = 'Tractor Number,Driver Name,Bags Loaded,Loading Team,Destination,Date,Status\n';
+            this.data.logistics.forEach(l => {
+                csv += `"${l.tractorNumber}","${l.driverName}",${l.bagsLoaded},"${l.loadingTeam}","${l.destination}","${l.date}","${l.status}"\n`;
+            });
+            this.downloadCSV(csv, 'Logistics.csv');
+        }
+
+        // 5. Payments
+        if (this.data.payments.length) {
+            let csv = 'Farmer Name,Account Number,Amount,Payment Date,Method,Status,Notes\n';
+            this.data.payments.forEach(p => {
+                csv += `"${p.farmerName}","${p.accountNumber}",${p.amount},"${p.paymentDate}","${p.method}","${p.status}","${p.notes}"\n`;
+            });
+            this.downloadCSV(csv, 'Payments.csv');
+        }
+    }
+
+    // Generate a single Excel/CSV sheet for seed distribution:
+    // Columns: Farmer Name | [Seed Type 1] | [Seed Type 2] | ... | [Seed Type N]
+    // Each row: Farmer, and number of bags taken for each seed type
+
+    generateSeedDistributionSummaryExcel() {
+        // Get all unique seed types
+        const seedTypes = [...new Set(this.data.distributions.map(d => d.seedType))];
+
+        // Get all unique farmers
+        const farmers = [...new Set(this.data.distributions.map(d => d.farmer))];
+
+        // Build header
+        let csv = 'Farmer Name';
+        seedTypes.forEach(type => {
+            csv += `,${type}`;
+        });
+        csv += '\n';
+
+        // Build rows: for each farmer, count bags for each seed type
+        farmers.forEach(farmer => {
+            csv += `"${farmer}"`;
+            seedTypes.forEach(type => {
+                const totalBags = this.data.distributions
+                    .filter(d => d.farmer === farmer && d.seedType === type)
+                    .reduce((sum, d) => sum + d.quantity, 0);
+                csv += `,${totalBags}`;
+            });
+            csv += '\n';
+        });
+
+        // Download as CSV
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'SeedDistributionSummary.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Utility for downloading CSV files
+    downloadCSV(csv, filename) {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 }
 
 // Initialize the application and make it globally accessible
