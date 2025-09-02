@@ -217,6 +217,14 @@
         </div>
     </div>
 
+    <!-- Beautiful Login/Signup Modal -->
+    <div id="authModal" class="modal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;">
+        <div class="modal-content" style="background:rgba(255,255,255,0.98);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);padding:2em;max-width:350px;width:90%;">
+            <h2 id="authModalTitle" style="text-align:center;margin-bottom:1em;">Login</h2>
+            <div id="authModalBody"></div>
+        </div>
+    </div>
+
     <!-- Loading Indicator -->
     <div id="loading" class="loading hidden">
         <div class="loading-spinner"></div>
@@ -231,6 +239,9 @@
         </div>
     </div>
 
+    <!-- Add Firebase JS SDKs before your app.js -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

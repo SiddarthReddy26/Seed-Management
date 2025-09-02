@@ -741,7 +741,7 @@ class AgricultureApp {
             `<option value="${f.name}" ${dist?.farmer === f.name ? 'selected' : ''}>${f.name}</option>`
         ).join('');
         
-        const inventoryOptions = this.data.inventory.map(i => 
+        const inventoryOptions = this.data.inventory.map(i
             `<option value="${i.type}" ${dist?.seedType === i.type ? 'selected' : ''}>${i.type}</option>`
         ).join('');
         
@@ -1428,6 +1428,107 @@ class AgricultureApp {
         URL.revokeObjectURL(url);
     }
 }
+
+// Firebase config and initialization
+const firebaseConfig = {
+  apiKey: "AIzaSyDUqzpAb_PTQnRBPDE8WooZq2Uahi0czL8",
+  authDomain: "seed-management.firebaseapp.com",
+  projectId: "seed-management",
+  storageBucket: "seed-management.firebasestorage.app",
+  messagingSenderId: "917147567409",
+  appId: "1:917147567409:web:926c2dbb9b35442b449c10",
+  measurementId: "G-SEMJH42LKE"
+};
+firebase.initializeApp(firebaseConfig);
+
+// Show/hide auth modal and block site until login/signup
+function showAuthModal(mode = "login") {
+    const modal = document.getElementById('authModal');
+    const body = document.getElementById('authModalBody');
+    const title = document.getElementById('authModalTitle');
+    modal.style.display = "flex";
+    title.textContent = mode === "login" ? "Login" : "Sign Up";
+
+    if (mode === "login") {
+        body.innerHTML = `
+            <form id="popupLoginForm" style="display:flex;flex-direction:column;gap:1em;">
+                <input type="email" id="popupEmail" placeholder="Email" required class="form-control" style="padding:0.75em;border-radius:8px;border:1px solid #ccc;">
+                <input type="password" id="popupPassword" placeholder="Password" required class="form-control" style="padding:0.75em;border-radius:8px;border:1px solid #ccc;">
+                <button type="submit" class="btn btn--primary" style="padding:0.75em;border-radius:8px;background:#2d7cff;color:#fff;border:none;">Login</button>
+            </form>
+            <div style="margin-top:1em;text-align:center;">
+                <a href="#" id="showSignupLink" style="color:#2d7cff;">Don't have an account? Sign Up</a>
+            </div>
+            <div id="popupAuthStatus" style="margin-top:1em;text-align:center;color:green;"></div>
+        `;
+        document.getElementById('popupLoginForm').onsubmit = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('popupEmail').value;
+            const password = document.getElementById('popupPassword').value;
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    document.getElementById('popupAuthStatus').textContent = "Logged in as " + userCredential.user.email;
+                    setTimeout(hideAuthModal, 800);
+                })
+                .catch(error => {
+                    document.getElementById('popupAuthStatus').textContent = error.message;
+                    document.getElementById('popupAuthStatus').style.color = "red";
+                });
+        };
+        document.getElementById('showSignupLink').onclick = function(e) {
+            e.preventDefault();
+            showAuthModal("signup");
+        };
+    } else {
+        body.innerHTML = `
+            <form id="popupSignupForm" style="display:flex;flex-direction:column;gap:1em;">
+                <input type="email" id="popupSignupEmail" placeholder="Email" required class="form-control" style="padding:0.75em;border-radius:8px;border:1px solid #ccc;">
+                <input type="password" id="popupSignupPassword" placeholder="Password" required class="form-control" style="padding:0.75em;border-radius:8px;border:1px solid #ccc;">
+                <button type="submit" class="btn btn--primary" style="padding:0.75em;border-radius:8px;background:#2d7cff;color:#fff;border:none;">Sign Up</button>
+            </form>
+            <div style="margin-top:1em;text-align:center;">
+                <a href="#" id="showLoginLink" style="color:#2d7cff;">Already have an account? Login</a>
+            </div>
+            <div id="popupAuthStatus" style="margin-top:1em;text-align:center;color:green;"></div>
+        `;
+        document.getElementById('popupSignupForm').onsubmit = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('popupSignupEmail').value;
+            const password = document.getElementById('popupSignupPassword').value;
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    document.getElementById('popupAuthStatus').textContent = "Account created for " + userCredential.user.email;
+                    setTimeout(hideAuthModal, 800);
+                })
+                .catch(error => {
+                    document.getElementById('popupAuthStatus').textContent = error.message;
+                    document.getElementById('popupAuthStatus').style.color = "red";
+                });
+        };
+        document.getElementById('showLoginLink').onclick = function(e) {
+            e.preventDefault();
+            showAuthModal("login");
+        };
+    }
+}
+
+function hideAuthModal() {
+    document.getElementById('authModal').style.display = "none";
+}
+
+// On page load, block site until login/signup
+window.addEventListener('DOMContentLoaded', function() {
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) {
+            showAuthModal("login");
+            // Hide main content until login
+            document.querySelector('main').style.display = "none";
+        } else {
+            hideAuthModal();
+            document.querySelector('main').style.display = "";
+        }
+    });
+});
 
 // Initialize the application and make it globally accessible
 window.app = new AgricultureApp();
