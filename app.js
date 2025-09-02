@@ -1451,15 +1451,20 @@ function showAuthModal(mode = "login") {
 
     if (mode === "login") {
         body.innerHTML = `
-            <form id="popupLoginForm" style="display:flex;flex-direction:column;gap:1em;">
-                <input type="email" id="popupEmail" placeholder="Email" required class="form-control" style="padding:0.75em;border-radius:8px;border:1px solid #ccc;">
-                <input type="password" id="popupPassword" placeholder="Password" required class="form-control" style="padding:0.75em;border-radius:8px;border:1px solid #ccc;">
-                <button type="submit" class="btn btn--primary" style="padding:0.75em;border-radius:8px;background:#2d7cff;color:#fff;border:none;">Login</button>
+            <form id="popupLoginForm" style="display:flex;flex-direction:column;gap:1em;width:100%;">
+                <input type="email" id="popupEmail" placeholder="Email" required
+                    style="padding:0.9em;border-radius:10px;border:1px solid #cfd8dc;font-size:1em;">
+                <input type="password" id="popupPassword" placeholder="Password" required
+                    style="padding:0.9em;border-radius:10px;border:1px solid #cfd8dc;font-size:1em;">
+                <button type="submit"
+                    style="padding:0.9em;border-radius:10px;background:#2d7cff;color:#fff;border:none;font-size:1em;font-weight:600;">
+                    Login
+                </button>
             </form>
             <div style="margin-top:1em;text-align:center;">
-                <a href="#" id="showSignupLink" style="color:#2d7cff;">Don't have an account? Sign Up</a>
+                <a href="#" id="showSignupLink" style="color:#2d7cff;font-weight:500;">Don't have an account? Sign Up</a>
             </div>
-            <div id="popupAuthStatus" style="margin-top:1em;text-align:center;color:green;"></div>
+            <div id="popupAuthStatus" style="margin-top:1em;text-align:center;color:#2d7cff;font-size:1em;"></div>
         `;
         document.getElementById('popupLoginForm').onsubmit = function(e) {
             e.preventDefault();
@@ -1468,11 +1473,12 @@ function showAuthModal(mode = "login") {
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then(userCredential => {
                     document.getElementById('popupAuthStatus').textContent = "Logged in as " + userCredential.user.email;
+                    document.getElementById('popupAuthStatus').style.color = "#2d7cff";
                     setTimeout(hideAuthModal, 800);
                 })
                 .catch(error => {
                     document.getElementById('popupAuthStatus').textContent = error.message;
-                    document.getElementById('popupAuthStatus').style.color = "red";
+                    document.getElementById('popupAuthStatus').style.color = "#e53935";
                 });
         };
         document.getElementById('showSignupLink').onclick = function(e) {
@@ -1481,15 +1487,20 @@ function showAuthModal(mode = "login") {
         };
     } else {
         body.innerHTML = `
-            <form id="popupSignupForm" style="display:flex;flex-direction:column;gap:1em;">
-                <input type="email" id="popupSignupEmail" placeholder="Email" required class="form-control" style="padding:0.75em;border-radius:8px;border:1px solid #ccc;">
-                <input type="password" id="popupSignupPassword" placeholder="Password" required class="form-control" style="padding:0.75em;border-radius:8px;border:1px solid #ccc;">
-                <button type="submit" class="btn btn--primary" style="padding:0.75em;border-radius:8px;background:#2d7cff;color:#fff;border:none;">Sign Up</button>
+            <form id="popupSignupForm" style="display:flex;flex-direction:column;gap:1em;width:100%;">
+                <input type="email" id="popupSignupEmail" placeholder="Email" required
+                    style="padding:0.9em;border-radius:10px;border:1px solid #cfd8dc;font-size:1em;">
+                <input type="password" id="popupSignupPassword" placeholder="Password" required
+                    style="padding:0.9em;border-radius:10px;border:1px solid #cfd8dc;font-size:1em;">
+                <button type="submit"
+                    style="padding:0.9em;border-radius:10px;background:#2d7cff;color:#fff;border:none;font-size:1em;font-weight:600;">
+                    Sign Up
+                </button>
             </form>
             <div style="margin-top:1em;text-align:center;">
-                <a href="#" id="showLoginLink" style="color:#2d7cff;">Already have an account? Login</a>
+                <a href="#" id="showLoginLink" style="color:#2d7cff;font-weight:500;">Already have an account? Login</a>
             </div>
-            <div id="popupAuthStatus" style="margin-top:1em;text-align:center;color:green;"></div>
+            <div id="popupAuthStatus" style="margin-top:1em;text-align:center;color:#2d7cff;font-size:1em;"></div>
         `;
         document.getElementById('popupSignupForm').onsubmit = function(e) {
             e.preventDefault();
@@ -1498,11 +1509,12 @@ function showAuthModal(mode = "login") {
             firebase.auth().createUserWithEmailAndPassword(email, password)
                 .then(userCredential => {
                     document.getElementById('popupAuthStatus').textContent = "Account created for " + userCredential.user.email;
+                    document.getElementById('popupAuthStatus').style.color = "#2d7cff";
                     setTimeout(hideAuthModal, 800);
                 })
                 .catch(error => {
                     document.getElementById('popupAuthStatus').textContent = error.message;
-                    document.getElementById('popupAuthStatus').style.color = "red";
+                    document.getElementById('popupAuthStatus').style.color = "#e53935";
                 });
         };
         document.getElementById('showLoginLink').onclick = function(e) {
